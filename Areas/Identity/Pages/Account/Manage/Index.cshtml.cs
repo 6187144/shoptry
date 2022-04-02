@@ -14,12 +14,12 @@ namespace shoptry.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ShopUser> _userManager;
+        private readonly SignInManager<ShopUser> _signInManager;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<ShopUser> userManager,
+            SignInManager<ShopUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -30,7 +30,7 @@ namespace shoptry.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
-
+        //public string BuyerId { get; set; }
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -56,20 +56,47 @@ namespace shoptry.Areas.Identity.Pages.Account.Manage
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+            [Display(Name = "Phone Number")]
+            public string Phone { get; set; }
+
+            [Required]
+            [Display(Name = "Full Name")]
+            public string Name { get; set; }
+
+            [Display(Name = "Street Number")]
+            public int StreetNumber { get; set; }
+
+            [Display(Name = "Street Name")]
+            public string StreetName { get; set; }
+
+            [Display(Name = "Postal Code")]
+            [RegularExpression(@"^[A-Za-z][0-9][A-Za-z][ ]*[0-9][A-Za-z][0-9]$")]
+            public string PostalCode { get; set; }
+
+            public string City { get; set; }
+
+            [Required]
+            public string Province { get; set; }
+
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ShopUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-
+            //var userId = await _userManager.GetUserIdAsync(user);
             Username = userName;
+            //BuyerId = userId;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                Phone = user.Phone,
+                Name = user.Name,
+                StreetNumber = user.StreetNumber,
+                StreetName = user.StreetName,
+                PostalCode = user.PostalCode,
+                City = user.City,
+                Province = user.Province
             };
         }
 
@@ -99,17 +126,15 @@ namespace shoptry.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
-            {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
-                    return RedirectToPage();
-                }
-            }
+            user.Phone = Input.Phone != user.Phone ? Input.Phone : user.Phone;
+            user.Name = Input.Name != user.Name ? Input.Name : user.Name;
+            user.StreetNumber = Input.StreetNumber != user.StreetNumber ? Input.StreetNumber : user.StreetNumber;
+            user.StreetName = Input.StreetName != user.StreetName ? Input.StreetName : user.StreetName;
+            user.City = Input.City != user.City ? Input.City : user.City;
+            user.PostalCode = Input.PostalCode != user.PostalCode ? Input.PostalCode : user.PostalCode;
+            user.Province = Input.Province != user.Province ? Input.Province : user.Province;
 
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();

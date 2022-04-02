@@ -79,6 +79,10 @@ namespace shoptry.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
@@ -129,6 +133,8 @@ namespace shoptry.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -214,6 +220,30 @@ namespace shoptry.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("shoptry.Models.Cart", b =>
+                {
+                    b.Property<uint>("CartId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int unsigned");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<uint>("Quantity")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<string>("ShopUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("CartId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ShopUserId");
+
+                    b.ToTable("Cart");
+                });
+
             modelBuilder.Entity("shoptry.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -235,6 +265,34 @@ namespace shoptry.Migrations
                     b.HasKey("ProductId");
 
                     b.ToTable("Product");
+                });
+
+            modelBuilder.Entity("shoptry.Models.ShopUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<string>("City")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Province")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("StreetName")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("StreetNumber")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("ShopUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -286,6 +344,21 @@ namespace shoptry.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("shoptry.Models.Cart", b =>
+                {
+                    b.HasOne("shoptry.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("shoptry.Models.ShopUser", "ShopUser")
+                        .WithMany()
+                        .HasForeignKey("ShopUserId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ShopUser");
                 });
 #pragma warning restore 612, 618
         }

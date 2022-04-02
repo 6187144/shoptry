@@ -1,3 +1,4 @@
+global using shoptry.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ builder.Services.AddRazorPages();
 
 var serverVersion = new MariaDbServerVersion(builder.Configuration.GetValue<string>("DBMSVersion"));
 var connectionString = builder.Configuration.GetConnectionString("StoreDBContext");
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<ShopUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<StoreDBContext>();
 builder.Services.AddDbContext<StoreDBContext>(options =>
     options.UseLazyLoadingProxies().UseMySql(connectionString, serverVersion));
